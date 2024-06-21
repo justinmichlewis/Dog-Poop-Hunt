@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.app.json",
+  "include": [
+    "src/**/*.ts",
+    "src/views/Home.vue",
+    "src/views/Test.vue",
+    "src/views/Login.vue",
+    "src/views/Map.vue",
+    "src/views/List.vue",
+    "src/views/Settings.vue"
+  ],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
+
+    "lib": [],
+    "types": ["node", "jsdom"]
+  }
+}
