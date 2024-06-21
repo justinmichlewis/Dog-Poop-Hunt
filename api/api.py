@@ -134,6 +134,22 @@ def update_poop(poop_id):
     return {"message": data}
 
 
+@app.route("/api/poops/", methods=["POST"])
+def create_poop():
+    #REMOVE AFTER TESTING -START
+    time.sleep(2)
+    data = request.json
+    #REMOVE AFTER TESTING -END
+    cursor = get_db().cursor()
+    cursor.execute("INSERT INTO poops (latitude, longitude, description, state, placed_user_id, picked_user_id, created_date, completed_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                   (data['latitude'], data['longitude'], data['description'], data['state'], data['placedUserId'], data['pickedUserId'], data['createdDate'], data['completedDate']))
+    get_db().commit()
+    return {"message": "New poop record created"}
+    
+
+
+    
+
 @app.route("/api/achievements/<user_id>", methods=["GET"])
 def get_achievements_user(user_id):
     cursor = get_db().cursor()
