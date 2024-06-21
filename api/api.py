@@ -145,10 +145,6 @@ def create_poop():
                    (data['latitude'], data['longitude'], data['description'], data['state'], data['placedUserId'], data['pickedUserId'], data['createdDate'], data['completedDate']))
     get_db().commit()
     return {"message": "New poop record created"}
-    
-
-
-    
 
 @app.route("/api/achievements/<user_id>", methods=["GET"])
 def get_achievements_user(user_id):
