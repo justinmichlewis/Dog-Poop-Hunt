@@ -13,16 +13,25 @@ import { useRouter } from "vue-router";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-const route = useRoute();
+import { useGeolocation } from "@vueuse/core";
+
+const { coords, locatedAt, error, resume, pause } = useGeolocation();
+
 const router = useRouter();
 
 const map = ref();
 let userLocation = ref([] as any[]);
-let updateMap = ref(false);
 
 const userMarkerIcon = L.icon({
   iconUrl: "/marker-user.png",
   iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
+
+const poopMarkerIcon = L.icon({
+  iconUrl: "/poop.png",
+  iconSize: [42, 42],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32],
 });
@@ -40,83 +49,55 @@ const props = defineProps({
   markers: Object,
 });
 
+watch(coords, (newCoords) => {
+  userLocation.value = [newCoords.latitude, newCoords.longitude];
+
+  loadMapData(props.markers as [Marker], userLocation.value);
+});
+
 watch(
   () => [props.markers, userLocation],
   ([newMarkers, newLocation]) => {
-    console.log("PropsMarkers", props.markers);
-    console.log("New markers", newMarkers);
-    console.log("New location1", newLocation.value);
     if (
-      (newMarkers === undefined ||
-        newLocation?.value.length === 0 ||
-        newLocation?.value === undefined) &&
-      !updateMap.value
+      newMarkers === undefined ||
+      newLocation?.value.length === 0 ||
+      newLocation?.value === undefined
     ) {
-      console.log(
-        "No markers or location",
-        newMarkers,
-        newLocation?.value,
-        newLocation?.value.length,
-        updateMap.value
-      );
     } else {
-      console.log("Updating map");
-      console.log(
-        "Passed IF",
-        newMarkers,
-        newLocation?.value,
-        newLocation?.value.length,
-        updateMap.value
-      );
-      addMarkers(newMarkers as [Marker]);
-
-      L.marker(newLocation?.value, {
-        icon: userMarkerIcon,
-      })
-        .bindPopup("You are here")
-        .addTo(map.value);
-
-      const bounds = findBounds(props.markers as [Marker]);
-
-      //Add user's location to bounds
-      bounds.push(newLocation?.value);
-
-      setBounds(bounds);
+      loadMapData(newMarkers as [Marker], newLocation.value);
     }
   }
 );
 
-watch(userLocation, (newLocation) => {
-  console.log("New location2", newLocation.value);
-  if (updateMap.value) {
-    addMarkers(props.markers as [Marker]);
-
-    L.marker(userLocation.value, {
-      icon: userMarkerIcon,
-    })
-      .bindPopup("You are here")
-      .addTo(map.value);
-
-    const bounds = findBounds(props.markers as [Marker]);
-
-    //Add user's location to bounds
-    bounds.push(userLocation.value);
-
-    setBounds(bounds);
-  }
-  // You can perform any actions here based on the change
+//Catch error for location services
+watch(error, (newError) => {
+  console.log("New error:", newError);
+  // Perform actions based on the error change
 });
 
 onMounted(async () => {
-  console.log(route.name);
-  route.name === "details"
-    ? (updateMap.value = true)
-    : (updateMap.value = false);
   initalizeMap();
-  await getLocation().then((location) => {
-    userLocation.value = location;
-  });
 });
+
+const loadMapData = (markers: [Marker], userLocation: any) => {
+  addMarkers(markers as [Marker]);
+  console.log("LMD - User location", userLocation);
+  console.log("LMD - new Markers", markers);
+  L.marker(userLocation, {
+    icon: userMarkerIcon,
+  })
+    .bindPopup("You are here")
+    .addTo(map.value);
+
+  const bounds = findBounds(props.markers as [Marker]);
+  console.log("Bounds", bounds);
+
+  //Add user's location to bounds
+  bounds.push(userLocation);
+  console.log("Bounds with user location", bounds);
+
+  setBounds(bounds);
+};
 
 const initalizeMap = () => {
   //Initalize map add add it to div with id mapContainer
@@ -129,7 +110,9 @@ const initalizeMap = () => {
 
 const addMarkers = (markers: [Marker]) => {
   markers.forEach((marker: Marker) => {
-    L.marker([marker.latitude, marker.longitude])
+    L.marker([marker.latitude, marker.longitude], {
+      icon: poopMarkerIcon,
+    })
       .addTo(map.value)
       .bindPopup(composePopUpContent(marker));
   });
@@ -155,6 +138,7 @@ const handlePopUpButtonClick = (marker: Marker) => {
 };
 
 const findBounds = (markers: [Marker]) => {
+  console.log("FB - Markers", markers);
   return markers.map((marker: Marker) => [marker.latitude, marker.longitude]);
 };
 
@@ -162,22 +146,6 @@ const setBounds = (bounds: []) => {
   if (bounds.length > 0) {
     let b = new L.LatLngBounds(bounds);
     map.value.fitBounds(b);
-  }
-};
-
-const getCurrentPosition = async () => {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(resolve, reject);
-  });
-};
-const getLocation = async () => {
-  try {
-    return await getCurrentPosition().then((position: any) => {
-      return [position.coords.latitude, position.coords.longitude];
-    });
-  } catch (error) {
-    console.error(error);
-    return [0, 0];
   }
 };
 </script>
