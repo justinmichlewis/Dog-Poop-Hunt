@@ -119,22 +119,47 @@ const addMarkers = (markers: [Marker]) => {
 };
 
 const composePopUpContent = (marker: Marker) => {
-  const button = document.createElement("button");
-  button.textContent = "Details";
-  button.addEventListener("click", () => handlePopUpButtonClick(marker));
+  const buttonDetails = document.createElement("button");
+  buttonDetails.textContent = "Details";
+  buttonDetails.addEventListener("click", () =>
+    handlePopUpButtonDetailsClick(marker)
+  );
+
+  const buttonNavigate = document.createElement("button");
+  buttonNavigate.textContent = "Navigate";
+  // buttonNavigate.style.background = "blue";
+  buttonNavigate.addEventListener("click", () =>
+    handlePopUpButtonNavigateClick(marker)
+  );
+
+  const buttonPickUp = document.createElement("button");
+  buttonPickUp.textContent = "Pick Up";
+  buttonPickUp.addEventListener("click", () =>
+    handlePopUpButtonPickUpClick(marker)
+  );
 
   const popupContent = document.createElement("div");
   popupContent.innerHTML = `
           <h3>${marker.description}</h3>
           <p>Age ${marker.age}</p>
         `;
-  popupContent.appendChild(button);
+  popupContent.appendChild(buttonDetails);
+  popupContent.appendChild(buttonNavigate);
+  popupContent.appendChild(buttonPickUp);
   return popupContent;
 };
 
-const handlePopUpButtonClick = (marker: Marker) => {
+const handlePopUpButtonDetailsClick = (marker: Marker) => {
   console.log(marker);
   router.push({ name: "details", query: marker });
+};
+
+const handlePopUpButtonNavigateClick = (marker: Marker) => {
+  console.log("Navigate to", marker);
+};
+
+const handlePopUpButtonPickUpClick = (marker: Marker) => {
+  console.log("Pick up", marker);
 };
 
 const findBounds = (markers: [Marker]) => {
