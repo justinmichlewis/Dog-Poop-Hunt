@@ -12,6 +12,7 @@ import { useRouter } from "vue-router";
 
 const userStore = useUserStore();
 const router = useRouter();
+
 const logOut = () => {
   userStore.clearUserData();
   router.push({ name: "login" });
