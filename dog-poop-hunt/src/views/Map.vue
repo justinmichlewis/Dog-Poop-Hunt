@@ -1,7 +1,12 @@
 <template>
   <BaseHeader title="Poop Map" />
   <BaseLoader v-show="loading" class="loading-container" />
-  <BaseMap :fullHeight="true" :markers="items" />
+  <button @click="markPoop">Mark Poop</button>
+  <BaseMap
+    @map-loaded="(n) => (loading = !n)"
+    :fullHeight="true"
+    :markers="items"
+  />
   <BaseNavBar :fixed="true" />
 </template>
 <script setup lang="ts">
@@ -27,13 +32,14 @@ onMounted(async () => {
   items.value = await fetch("http://127.0.0.1:5000/api/poops")
     .then((response) => response.json())
     .then((data) => {
-      loading.value = false;
       return data.filter((item: Item) => item.status === "active");
     })
     .catch((error) => console.log("Err", error));
-
-  console.log("Items", items.value);
 });
+
+const markPoop = async () => {
+  console.log("Marking poop");
+};
 </script>
 <style scoped>
 .loading-container {

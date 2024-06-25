@@ -8,19 +8,22 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { onMounted } from "vue";
-import { useRoute } from "vue-router";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import type { LatLngExpression } from "leaflet";
+import L, { Marker } from "leaflet";
 
 import { useGeolocation } from "@vueuse/core";
 
 const { coords, locatedAt, error, resume, pause } = useGeolocation();
 
+const route = useRoute();
 const router = useRouter();
 
 const map = ref();
 let userLocation = ref([] as any[]);
+let userMarkerHistory: Marker | null = null;
+let markersOnMap: Marker[] = [];
 
 const userMarkerIcon = L.icon({
   iconUrl: "/marker-user.png",
@@ -36,7 +39,7 @@ const poopMarkerIcon = L.icon({
   popupAnchor: [0, -32],
 });
 
-interface Marker {
+interface IMarker {
   poopId: number;
   latitude: number;
   longitude: number;
@@ -49,22 +52,42 @@ const props = defineProps({
   markers: Object,
 });
 
+const emit = defineEmits(["map-loaded"]);
+
 watch(coords, (newCoords) => {
   userLocation.value = [newCoords.latitude, newCoords.longitude];
 
-  loadMapData(props.markers as [Marker], userLocation.value);
+  //Remove previous user marker if exists
+  if (userMarkerHistory !== null) {
+    map.value.removeLayer(userMarkerHistory);
+  }
+  let userMarker = L.marker(
+    [newCoords.latitude, newCoords.longitude] as LatLngExpression,
+    {
+      icon: userMarkerIcon,
+    }
+  )
+    .bindPopup("You are here")
+    .addTo(map.value);
+
+  userMarkerHistory = userMarker;
 });
 
 watch(
-  () => [props.markers, userLocation],
-  ([newMarkers, newLocation]) => {
-    if (
-      newMarkers === undefined ||
-      newLocation?.value.length === 0 ||
-      newLocation?.value === undefined
-    ) {
-    } else {
-      loadMapData(newMarkers as [Marker], newLocation.value);
+  () => [props.markers, coords.value],
+  ([newMarkers, newCoords], [oldMarkers, oldCoords]) => {
+    if (newMarkers?.length !== 0 && newCoords?.accuracy !== 0) {
+      console.log("ALL DATA LOADED", newMarkers, newCoords);
+
+      addMarkers(newMarkers as [IMarker]);
+
+      const bounds = findBounds(props.markers as [IMarker]);
+
+      //Add user's location to bounds
+      bounds.push(userLocation.value);
+
+      setBounds(bounds);
+      emit("map-loaded", true);
     }
   }
 );
@@ -77,27 +100,11 @@ watch(error, (newError) => {
 
 onMounted(async () => {
   initalizeMap();
+  //If coming from details page, markers are already loaded, so add markers to the map on mount, else watcher will pick up markers when loaded from map page
+  if (router.currentRoute.value.name === "details") {
+    addMarkers([route.query as unknown as IMarker]);
+  }
 });
-
-const loadMapData = (markers: [Marker], userLocation: any) => {
-  addMarkers(markers as [Marker]);
-  console.log("LMD - User location", userLocation);
-  console.log("LMD - new Markers", markers);
-  L.marker(userLocation, {
-    icon: userMarkerIcon,
-  })
-    .bindPopup("You are here")
-    .addTo(map.value);
-
-  const bounds = findBounds(props.markers as [Marker]);
-  console.log("Bounds", bounds);
-
-  //Add user's location to bounds
-  bounds.push(userLocation);
-  console.log("Bounds with user location", bounds);
-
-  setBounds(bounds);
-};
 
 const initalizeMap = () => {
   //Initalize map add add it to div with id mapContainer
@@ -108,17 +115,26 @@ const initalizeMap = () => {
   }).addTo(map.value);
 };
 
-const addMarkers = (markers: [Marker]) => {
-  markers.forEach((marker: Marker) => {
-    L.marker([marker.latitude, marker.longitude], {
-      icon: poopMarkerIcon,
-    })
-      .addTo(map.value)
-      .bindPopup(composePopUpContent(marker));
+const addMarkers = (markers: [IMarker]) => {
+  markers.forEach((marker: IMarker) => {
+    console.log("EXISTS,", markerExists(String(marker.poopId)));
+    if (markerExists(String(marker.poopId))) return;
+    markersOnMap.push(
+      L.marker([marker.latitude, marker.longitude], {
+        icon: poopMarkerIcon,
+        id: String(marker.poopId),
+      })
+        .addTo(map.value)
+        .bindPopup(composePopUpContent(marker))
+    );
   });
 };
 
-const composePopUpContent = (marker: Marker) => {
+function markerExists(id: string) {
+  return markersOnMap.some((marker) => marker.options.id === id);
+}
+
+const composePopUpContent = (marker: IMarker) => {
   const buttonDetails = document.createElement("button");
   buttonDetails.textContent = "Details";
   buttonDetails.addEventListener("click", () =>
@@ -149,22 +165,21 @@ const composePopUpContent = (marker: Marker) => {
   return popupContent;
 };
 
-const handlePopUpButtonDetailsClick = (marker: Marker) => {
+const handlePopUpButtonDetailsClick = (marker: IMarker) => {
   console.log(marker);
   router.push({ name: "details", query: marker });
 };
 
-const handlePopUpButtonNavigateClick = (marker: Marker) => {
+const handlePopUpButtonNavigateClick = (marker: IMarker) => {
   console.log("Navigate to", marker);
 };
 
-const handlePopUpButtonPickUpClick = (marker: Marker) => {
+const handlePopUpButtonPickUpClick = (marker: IMarker) => {
   console.log("Pick up", marker);
 };
 
-const findBounds = (markers: [Marker]) => {
-  console.log("FB - Markers", markers);
-  return markers.map((marker: Marker) => [marker.latitude, marker.longitude]);
+const findBounds = (markers: [IMarker]) => {
+  return markers.map((marker: IMarker) => [marker.latitude, marker.longitude]);
 };
 
 const setBounds = (bounds: []) => {
