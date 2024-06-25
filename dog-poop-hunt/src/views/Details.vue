@@ -38,6 +38,7 @@ const markers = reactive([
   {
     latitude: query.latitude,
     longitude: query.longitude,
+    poopId: query.poopId,
   },
 ]);
 
