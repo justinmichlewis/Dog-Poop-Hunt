@@ -16,7 +16,7 @@ import { deletePoop } from "../services/api";
 import { useUserStore } from "@/stores/user";
 import "leaflet/dist/leaflet.css";
 
-const { coords, locatedAt, error, resume, pause } = useGeolocation();
+const { coords, error } = useGeolocation();
 
 const route = useRoute();
 const router = useRouter();
@@ -70,6 +70,7 @@ const emit = defineEmits(["map-loaded", "coords"]);
 
 watch(coords, (newCoords) => {
   userLocation.value = [newCoords.latitude, newCoords.longitude];
+  console.log("New coords:", userLocation.value);
   emit("coords", userLocation.value);
   //If user marker already exists, update it's position
   if (userMarkerPlaced) {
@@ -170,13 +171,6 @@ const composePopUpContent = (marker: IMarker) => {
     handlePopUpButtonDetailsClick(marker)
   );
 
-  const buttonNavigate = document.createElement("button");
-  buttonNavigate.textContent = "Navigate";
-  // buttonNavigate.style.background = "blue";
-  buttonNavigate.addEventListener("click", () =>
-    handlePopUpButtonNavigateClick(marker)
-  );
-
   const buttonPickUp = document.createElement("button");
   buttonPickUp.textContent = "Pick Up";
   buttonPickUp.addEventListener("click", () =>
@@ -189,7 +183,6 @@ const composePopUpContent = (marker: IMarker) => {
           <p>Age ${marker.age}</p>
         `;
   popupContent.appendChild(buttonDetails);
-  popupContent.appendChild(buttonNavigate);
   popupContent.appendChild(buttonPickUp);
   return popupContent;
 };
@@ -197,10 +190,6 @@ const composePopUpContent = (marker: IMarker) => {
 const handlePopUpButtonDetailsClick = (marker: IMarker) => {
   console.log(marker);
   router.push({ name: "details", query: marker });
-};
-
-const handlePopUpButtonNavigateClick = (marker: IMarker) => {
-  console.log("Navigate to", marker);
 };
 
 const handlePopUpButtonPickUpClick = (markerPickedUp: IMarker) => {

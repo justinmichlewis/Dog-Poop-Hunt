@@ -12,6 +12,7 @@ const props = defineProps({
 
 <style scoped>
 header {
+  position: relative;
   background-color: #5d676b;
   color: white;
   padding: 15px 0;
