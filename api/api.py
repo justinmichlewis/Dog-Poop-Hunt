@@ -1,21 +1,31 @@
 import sqlite3
 from datetime import date, datetime
-from flask import Flask, g, request
+from flask import Flask, g, request, jsonify
 from flask_cors import CORS
 import math
 import time
 
 app = Flask(__name__)
+
+
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 app.config["DATABASE"] = "../db/master.db"
-
 
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
         db = g._database = sqlite3.connect(app.config["DATABASE"])
     return db
+
+@app.before_request
+def before_request():
+    headers = {'Access-Control-Allow-Origin': '*',
+               'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+               'Access-Control-Allow-Headers': 'Content-Type'}
+    if request.method.lower() == 'options':
+        return jsonify(headers), 200
 
 
 @app.teardown_appcontext
@@ -24,16 +34,7 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-
-@app.route("/")
-def index():
-    # Example query
-    cursor = get_db().cursor()
-    cursor.execute("SELECT * FROM poops")
-    rows = cursor.fetchall()
-    return str(rows)
-
-
+#GET USER BY ID
 @app.route("/api/users/<user_id>", methods=["GET"])
 def users(user_id):
 
@@ -57,7 +58,7 @@ def users(user_id):
 
     return data
 
-
+#GET ALL POOPS
 @app.route("/api/poops/", methods=["GET"])
 def get_poops():
 
@@ -91,7 +92,7 @@ def get_poops():
         data_list.append(data)
     return data_list
 
-
+#GET POOPS BY USERID
 @app.route("/api/poops/placeduser/<user_id>", methods=["GET"])
 def get_poops_user(user_id):
     cursor = get_db().cursor()
@@ -120,7 +121,7 @@ def get_poops_user(user_id):
         data_list.append(data)
     return data_list
 
-
+#UPDATE POOP
 @app.route("/api/poops/<poop_id>", methods=["POST"])
 def update_poop(poop_id):
     #REMOVE AFTER TESTING -START
@@ -133,18 +134,30 @@ def update_poop(poop_id):
     print(data['state'])
     return {"message": data}
 
-
-@app.route("/api/poops/", methods=["POST"])
+#CREATE POOP
+@app.route("/api/poops/", methods=["POST", "OPTIONS"])
 def create_poop():
     #REMOVE AFTER TESTING -START
     time.sleep(2)
+
     data = request.json
     #REMOVE AFTER TESTING -END
     cursor = get_db().cursor()
     cursor.execute("INSERT INTO poops (latitude, longitude, description, state, placed_user_id, picked_user_id, created_date, completed_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                    (data['latitude'], data['longitude'], data['description'], data['state'], data['placedUserId'], data['pickedUserId'], data['createdDate'], data['completedDate']))
     get_db().commit()
-    return {"message": "New poop record created"}
+
+    max_record = None
+    max_value = float('-inf')  # Start with a very low value
+
+    poops_data = get_poops()
+    for record in poops_data:
+        value = record['poopId']
+        if value > max_value:
+            max_value = value
+            max_record = record
+
+    return jsonify({"message": "New poop record created", "result": max_record})
 
 @app.route("/api/achievements/<user_id>", methods=["GET"])
 def get_achievements_user(user_id):
