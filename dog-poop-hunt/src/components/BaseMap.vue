@@ -9,21 +9,26 @@
 import { ref, watch } from "vue";
 import { onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import "leaflet/dist/leaflet.css";
 import type { LatLngExpression } from "leaflet";
 import L, { Marker } from "leaflet";
-
 import { useGeolocation } from "@vueuse/core";
+import { deletePoop } from "../services/api";
+import { useUserStore } from "@/stores/user";
+import "leaflet/dist/leaflet.css";
 
 const { coords, locatedAt, error, resume, pause } = useGeolocation();
 
 const route = useRoute();
 const router = useRouter();
 
+const userStore = useUserStore();
+
 const map = ref();
 let userLocation = ref([] as any[]);
+let poopMarkersOnMap: Marker[] = [];
 let userMarkerHistory: Marker | null = null;
-let markersOnMap: Marker[] = [];
+let userMarkerPlaced: Boolean = false;
+let userMarker: Marker | null = null;
 
 const userMarkerIcon = L.icon({
   iconUrl: "/marker-user.png",
@@ -57,18 +62,21 @@ const emit = defineEmits(["map-loaded"]);
 watch(coords, (newCoords) => {
   userLocation.value = [newCoords.latitude, newCoords.longitude];
 
-  //Remove previous user marker if exists
-  if (userMarkerHistory !== null) {
-    map.value.removeLayer(userMarkerHistory);
+  //If user marker already exists, update it's position
+  if (userMarkerPlaced) {
+    userMarker?.setLatLng([newCoords.latitude, newCoords.longitude]);
+  } else {
+    userMarker = L.marker(
+      [newCoords.latitude, newCoords.longitude] as LatLngExpression,
+      {
+        icon: userMarkerIcon,
+      }
+    )
+      .bindPopup("You are here")
+      .addTo(map.value);
+    //If user marker is placed, set userMarkerPlaced to true so new marker is not created when coords change
+    !userMarkerPlaced ? (userMarkerPlaced = true) : false;
   }
-  let userMarker = L.marker(
-    [newCoords.latitude, newCoords.longitude] as LatLngExpression,
-    {
-      icon: userMarkerIcon,
-    }
-  )
-    .bindPopup("You are here")
-    .addTo(map.value);
 
   userMarkerHistory = userMarker;
 });
@@ -77,8 +85,7 @@ watch(
   () => [props.markers, coords.value],
   ([newMarkers, newCoords], [oldMarkers, oldCoords]) => {
     if (newMarkers?.length !== 0 && newCoords?.accuracy !== 0) {
-      console.log("ALL DATA LOADED", newMarkers, newCoords);
-
+      console.log("ALL DATA LOADED");
       addMarkers(newMarkers as [IMarker]);
 
       const bounds = findBounds(props.markers as [IMarker]);
@@ -117,9 +124,9 @@ const initalizeMap = () => {
 
 const addMarkers = (markers: [IMarker]) => {
   markers.forEach((marker: IMarker) => {
-    console.log("EXISTS,", markerExists(String(marker.poopId)));
     if (markerExists(String(marker.poopId))) return;
-    markersOnMap.push(
+
+    poopMarkersOnMap.push(
       L.marker([marker.latitude, marker.longitude], {
         icon: poopMarkerIcon,
         id: String(marker.poopId),
@@ -131,7 +138,7 @@ const addMarkers = (markers: [IMarker]) => {
 };
 
 function markerExists(id: string) {
-  return markersOnMap.some((marker) => marker.options.id === id);
+  return poopMarkersOnMap.some((marker) => marker.options.id === id);
 }
 
 const composePopUpContent = (marker: IMarker) => {
@@ -174,8 +181,17 @@ const handlePopUpButtonNavigateClick = (marker: IMarker) => {
   console.log("Navigate to", marker);
 };
 
-const handlePopUpButtonPickUpClick = (marker: IMarker) => {
-  console.log("Pick up", marker);
+const handlePopUpButtonPickUpClick = (markerPickedUp: IMarker) => {
+  try {
+    deletePoop(markerPickedUp.poopId, userStore.id);
+
+    const m = poopMarkersOnMap.find(
+      (marker) => marker.options.id === String(markerPickedUp.poopId)
+    );
+    map.value.removeLayer(m);
+  } catch (error) {
+    console.log("Error deleting poop", error);
+  }
 };
 
 const findBounds = (markers: [IMarker]) => {
