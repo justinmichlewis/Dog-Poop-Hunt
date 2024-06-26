@@ -21,6 +21,7 @@
 import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
+import { deletePoop } from "@/services/api";
 import BaseHeader from "@/components/BaseHeader.vue";
 import BaseNavBar from "@/components/BaseNavBar.vue";
 import BaseMap from "@/components/BaseMap.vue";
@@ -49,46 +50,12 @@ const showPopUp = ref(false);
 
 const pickUp = async () => {
   loading.value = true;
-  const currentDate = new Date();
-  const formattedDate = currentDate.toISOString().split("T")[0];
-
-  const myHeaders = new Headers();
-  myHeaders.append("Content-Type", "application/json");
-
-  const raw = JSON.stringify({
-    state: "completed",
-    completedDate: formattedDate,
-    pickedUserId: userStore.id,
-  });
-
-  const requestOptions = {
-    method: "POST",
-    headers: myHeaders,
-    body: raw,
-    redirect: "follow",
-  };
-
-  const results = await fetch(
-    "http://127.0.0.1:5000/api/poops/" + query.poopId,
-    requestOptions
-  )
-    .then((response) => response.text())
-    .then((result) => {
-      console.log(result);
-      loading.value = false;
-      showPopUp.value = true;
-      setTimeout(() => {
-        router.back();
-      }, 2000);
-
-      return true;
-    })
-    .catch((error) => {
-      console.error(error);
-      loading.value = false;
-      return false;
-    });
-  console.log("Results", results);
+  deletePoop(query.poopId, userStore.id);
+  loading.value = false;
+  showPopUp.value = true;
+  setTimeout(() => {
+    router.back();
+  }, 2000);
 };
 </script>
 
