@@ -16,6 +16,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user";
 import BaseNavBar from "@/components/BaseNavBar.vue";
 import BaseHeader from "@/components/BaseHeader.vue";
 import ListsViewListItem from "@/components/ListViewListItem.vue";
@@ -32,6 +33,8 @@ interface Item {
 }
 
 const router = useRouter();
+
+const userStore = useUserStore();
 
 let items = ref<Item[]>([]);
 let itemsHistory: Item[] = [];
@@ -52,9 +55,11 @@ onMounted(async () => {
 const filterPoops = (filter: boolean) => {
   items.value = itemsHistory;
   console.log("Filter", filter);
+  console.log("Items", items.value);
   if (filter) {
     items.value = items.value.filter(
-      (item: Item) => item.placedUserId === 1 && item.status === "active"
+      (item: Item) =>
+        item.placedUserId === userStore.id && item.status === "active"
     );
     console.log("Items", items.value);
   } else {

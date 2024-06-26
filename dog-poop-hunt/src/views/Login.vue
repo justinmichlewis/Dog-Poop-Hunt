@@ -30,7 +30,7 @@ const logIn = async () => {
     achievmentsData.totalPoints,
     Number(userName.value)
   );
-  router.push({ name: "home" });
+  router.push({ name: "map" });
 };
 
 const getUser = async () => {

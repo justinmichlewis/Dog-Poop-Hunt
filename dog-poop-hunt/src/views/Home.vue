@@ -10,7 +10,7 @@
 
       <div class="section">
         You have a total score of {{ userStore.score }}
-        <button>Mark</button>
+        <button @click="router.push({ name: 'mark' })">Mark</button>
       </div>
     </div>
   </div>

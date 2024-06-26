@@ -23,12 +23,62 @@ const deletePoop = async (poopId: number, pickedUserId: number) => {
   )
     .then((response) => response.text())
     .then((result) => {
-      console.log(result);
-      return result;
+      return { success: true, res: result };
     })
     .catch((error) => {
-      return error;
+      return { success: false, res: error };
     });
 };
 
-export { deletePoop };
+const createPoop = async (
+  description: string,
+  userId: number,
+  latitude: Number,
+  longitude: Number
+) => {
+  const currentDate = new Date();
+  const formattedDate = currentDate.toISOString().split("T")[0];
+
+  const myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
+
+  const raw = JSON.stringify({
+    latitude: latitude,
+    longitude: longitude,
+    description: description,
+    state: "active",
+    placedUserId: userId,
+    pickedUserId: null,
+    createdDate: formattedDate,
+    completedDate: null,
+  });
+
+  const requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow",
+  };
+
+  return await fetch("http://127.0.0.1:5000/api/poops", requestOptions)
+    .then((response) => response.json())
+    .then((result) => {
+      return { success: true, res: result };
+    })
+    .catch((error) => {
+      return { success: false, res: error };
+    });
+};
+
+const getPoops = async () => {
+  return await fetch("http://127.0.0.1:5000/api/poops")
+    .then((response) => response.json())
+    .then((data) => {
+      return { success: true, res: data };
+    })
+    .catch((error) => {
+      return { success: false, res: error };
+    });
+};
+
+export { deletePoop, createPoop, getPoops };

@@ -44,24 +44,33 @@ const poopMarkerIcon = L.icon({
   popupAnchor: [0, -32],
 });
 
+const poopMarkerGoldIcon = L.icon({
+  iconUrl: "/poop-gold.png",
+  iconSize: [42, 42],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
+
 interface IMarker {
   poopId: number;
   latitude: number;
   longitude: number;
   description: string;
   age: number;
+  placedUserId: number;
 }
 
 const props = defineProps({
   fullHeight: Boolean,
   markers: Object,
+  updateMap: Number,
 });
 
-const emit = defineEmits(["map-loaded"]);
+const emit = defineEmits(["map-loaded", "coords"]);
 
 watch(coords, (newCoords) => {
   userLocation.value = [newCoords.latitude, newCoords.longitude];
-
+  emit("coords", userLocation.value);
   //If user marker already exists, update it's position
   if (userMarkerPlaced) {
     userMarker?.setLatLng([newCoords.latitude, newCoords.longitude]);
@@ -82,10 +91,12 @@ watch(coords, (newCoords) => {
 });
 
 watch(
-  () => [props.markers, coords.value],
-  ([newMarkers, newCoords], [oldMarkers, oldCoords]) => {
-    if (newMarkers?.length !== 0 && newCoords?.accuracy !== 0) {
-      console.log("ALL DATA LOADED");
+  () => [props.markers, coords.value, props.updateMap],
+  ([newMarkers, newCoords, newUpdateMap]) => {
+    if (
+      (newMarkers?.length !== 0 && newCoords?.accuracy !== 0) ||
+      newUpdateMap
+    ) {
       addMarkers(newMarkers as [IMarker]);
 
       const bounds = findBounds(props.markers as [IMarker]);
@@ -125,15 +136,26 @@ const initalizeMap = () => {
 const addMarkers = (markers: [IMarker]) => {
   markers.forEach((marker: IMarker) => {
     if (markerExists(String(marker.poopId))) return;
-
-    poopMarkersOnMap.push(
-      L.marker([marker.latitude, marker.longitude], {
-        icon: poopMarkerIcon,
-        id: String(marker.poopId),
-      })
-        .addTo(map.value)
-        .bindPopup(composePopUpContent(marker))
-    );
+    console.log("maarker", marker);
+    if (userStore.id === marker.placedUserId) {
+      poopMarkersOnMap.push(
+        L.marker([marker.latitude, marker.longitude], {
+          icon: poopMarkerGoldIcon,
+          id: String(marker.poopId),
+        })
+          .addTo(map.value)
+          .bindPopup(composePopUpContent(marker))
+      );
+    } else {
+      poopMarkersOnMap.push(
+        L.marker([marker.latitude, marker.longitude], {
+          icon: poopMarkerIcon,
+          id: String(marker.poopId),
+        })
+          .addTo(map.value)
+          .bindPopup(composePopUpContent(marker))
+      );
+    }
   });
 };
 
@@ -203,6 +225,10 @@ const setBounds = (bounds: []) => {
     let b = new L.LatLngBounds(bounds);
     map.value.fitBounds(b);
   }
+};
+
+const markPoop = () => {
+  console.log("Marking poop");
 };
 </script>
 
