@@ -1,4 +1,4 @@
-const deletePoop = async (poopId: string, pickedUserId: string) => {
+const deletePoop = async (poopId: number, pickedUserId: number) => {
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().split("T")[0];
 
