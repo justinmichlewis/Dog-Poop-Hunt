@@ -5,7 +5,7 @@
     <div class="flex">
       <div class="section">
         You have {{ userStore.poopsCollected }} poops collected
-        <button @click="router.push({ name: 'list' })">Hunt</button>
+        <button @click="router.push({ name: 'map' })">Hunt</button>
       </div>
 
       <div class="section">
