@@ -81,4 +81,26 @@ const getPoops = async () => {
     });
 };
 
-export { deletePoop, createPoop, getPoops };
+const getUser = async (userName: string) => {
+  return await fetch("http://127.0.0.1:5000/api/users/" + userName)
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+const getAchievements = async (userName: string) => {
+  return await fetch("http://127.0.0.1:5000/api/achievements/" + userName)
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+export { deletePoop, createPoop, getPoops, getUser, getAchievements };
