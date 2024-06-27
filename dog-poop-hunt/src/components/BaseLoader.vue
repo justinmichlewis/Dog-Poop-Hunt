@@ -1,5 +1,5 @@
 <template>
-  <div class="lspinner-overlay">
+  <div class="lspinner-overlay loading-container">
     <div class="spinner"></div>
   </div>
 </template>
@@ -25,6 +25,17 @@
   border-top-color: #56bfea;
   border-radius: 50%;
   animation: spin 1s ease-in-out infinite;
+}
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
 }
 
 @keyframes spin {
