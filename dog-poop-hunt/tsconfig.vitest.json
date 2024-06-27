@@ -7,7 +7,7 @@
     "src/views/Login.vue",
     "src/views/Map.vue",
     "src/views/List.vue",
-    "src/views/Settings.vue"
+    "src/views/Me.vue"
   ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
