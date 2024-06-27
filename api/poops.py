@@ -33,30 +33,6 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-#GET USER BY ID
-@app.route("/api/users/<user_id>", methods=["GET"])
-def users(user_id):
-
-    # Example query
-    cursor = get_db().cursor()
-    cursor.execute(f"SELECT * FROM user WHERE user_id = ?", (user_id))
-    rows = cursor.fetchall()
-    print(rows)
-    data = ""
-    for row in rows:
-        print(rows)
-        data = {
-            "userId": row[0],
-            "firstName": row[1],
-            "lastName": row[2],
-            "email": row[3],
-            "active": row[4],
-            "createdDate": row[5],
-        }
-        
-
-    return data
-
 #GET ALL POOPS
 @app.route("/api/poops/", methods=["GET"])
 def get_poops():
