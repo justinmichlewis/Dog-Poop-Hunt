@@ -2,8 +2,10 @@
   <div class="container">
     <h1>Dog Poop Hunt</h1>
     <form @submit.prevent>
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" v-model="userName" />
+      <label for="username">Email:</label>
+      <input type="email" id="email" name="email" v-model="email" />
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" v-model="password" />
       <button type="submit" @click="logIn">Login</button>
     </form>
   </div>
@@ -12,26 +14,56 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
-import { getAchievements, getUser } from "@/services/api";
+import { getAchievements, getUser, authenticateUser } from "@/services/api";
+import CryptoJS from "crypto-js";
 
-const userName = ref("");
+const email = ref("");
+const password = ref("");
 const router = useRouter();
 const userStore = useUserStore();
 
 const logIn = async () => {
-  const userData = await getUser(userName.value);
-  const achievmentsData = await getAchievements(userName.value);
+  var passphrase = "kldiki990dlkl2k2990dlsls";
+  var iv = CryptoJS.lib.WordArray.random(16); // 16 bytes IV for AES-128
 
-  userStore.setUserData(
-    userData.firstName,
-    userData.lastName,
-    userData.email,
-    achievmentsData.totalPoopsPicked,
-    -1,
-    achievmentsData.totalPoints,
-    Number(userName.value)
+  // Encrypt
+  var encrypted = CryptoJS.AES.encrypt(
+    password.value,
+    CryptoJS.enc.Utf8.parse(passphrase),
+    {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    }
   );
-  router.push({ name: "map" });
+
+  // Convert IV and encrypted data to Base64
+  var ivBase64 = CryptoJS.enc.Base64.stringify(iv);
+  var encryptedBase64 = encrypted.toString();
+
+  // Prepare data to send to Flask server
+  var requestData = {
+    iv: ivBase64,
+    encrypted_message: encryptedBase64,
+  };
+
+  const response = await authenticateUser(email.value, requestData);
+
+  console.log(response);
+
+  // const userData = await getUser(userName.value);
+  // const achievmentsData = await getAchievements(userName.value);
+
+  // userStore.setUserData(
+  //   userData.firstName,
+  //   userData.lastName,
+  //   userData.email,
+  //   achievmentsData.totalPoopsPicked,
+  //   -1,
+  //   achievmentsData.totalPoints,
+  //   Number(userName.value)
+  // );
+  // router.push({ name: "map" });
 };
 </script>
 

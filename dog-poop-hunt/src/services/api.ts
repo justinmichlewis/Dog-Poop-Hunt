@@ -92,6 +92,36 @@ const getUser = async (userName: string) => {
     });
 };
 
+const authenticateUser = async (email: string, password: string) => {
+  const raw = JSON.stringify({
+    email: email,
+    password: password,
+  });
+
+  console.log(raw);
+  const myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
+
+  const requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow",
+  };
+
+  return await fetch(
+    "http://127.0.0.1:8001/api/users/authenticate",
+    requestOptions
+  )
+    .then((response) => response.json())
+    .then((result) => {
+      return result;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
 const getAchievements = async (userName: string) => {
   return await fetch("http://127.0.0.1:5000/api/achievements/" + userName)
     .then((response) => response.json())
@@ -103,4 +133,11 @@ const getAchievements = async (userName: string) => {
     });
 };
 
-export { deletePoop, createPoop, getPoops, getUser, getAchievements };
+export {
+  deletePoop,
+  createPoop,
+  getPoops,
+  getUser,
+  getAchievements,
+  authenticateUser,
+};
