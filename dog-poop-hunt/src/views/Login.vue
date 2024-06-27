@@ -1,10 +1,12 @@
 <template>
-  <h1>Dog Poop Hunt</h1>
-  <form @submit.prevent>
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" v-model="userName" />
-    <button type="submit" @click="logIn">Login</button>
-  </form>
+  <div class="container">
+    <h1>Dog Poop Hunt</h1>
+    <form @submit.prevent>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" v-model="userName" />
+      <button type="submit" @click="logIn">Login</button>
+    </form>
+  </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
@@ -18,8 +20,6 @@ const userStore = useUserStore();
 const logIn = async () => {
   const userData = await getUser();
   const achievmentsData = await getAchievements();
-  console.log(userData);
-  console.log(achievmentsData);
 
   userStore.setUserData(
     userData.firstName,
@@ -76,7 +76,8 @@ input {
   padding: 12px 20px;
   margin: 8px 0;
   box-sizing: border-box;
-  border-color: rgb(215, 213, 213);
+  border-color: rgb(213, 213, 213);
+  border-radius: 10px;
 }
 button {
   background-color: rgb(109, 202, 109);
@@ -97,5 +98,11 @@ label {
   font-size: 1.5em;
   margin-top: 20px;
   margin-bottom: 10px;
+}
+.container {
+  background-color: #56bfea;
+  padding: 10px;
+  text-align: center;
+  height: 100vh;
 }
 </style>
