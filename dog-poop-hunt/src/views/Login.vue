@@ -12,14 +12,15 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
+import { getAchievements, getUser } from "@/services/api";
 
 const userName = ref("");
 const router = useRouter();
 const userStore = useUserStore();
 
 const logIn = async () => {
-  const userData = await getUser();
-  const achievmentsData = await getAchievements();
+  const userData = await getUser(userName.value);
+  const achievmentsData = await getAchievements(userName.value);
 
   userStore.setUserData(
     userData.firstName,
@@ -31,28 +32,6 @@ const logIn = async () => {
     Number(userName.value)
   );
   router.push({ name: "map" });
-};
-
-const getUser = async () => {
-  return await fetch("http://127.0.0.1:5000/api/users/" + userName.value)
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-const getAchievements = async () => {
-  return await fetch("http://127.0.0.1:5000/api/achievements/" + userName.value)
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
 };
 </script>
 
