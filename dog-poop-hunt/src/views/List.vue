@@ -78,14 +78,6 @@ const onItemClicked = (item: Item) => {
 .header-padding {
   margin-top: 60px;
 }
-.loading-container {
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 50vh;
-}
 .bottom-margin {
   margin-bottom: 100px;
 }

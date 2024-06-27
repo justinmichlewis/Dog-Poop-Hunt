@@ -1,28 +1,39 @@
 <template>
   <div class="container">
-    <h1>Dog Poop Hunt</h1>
-    <form @submit.prevent>
-      <label for="username">Email:</label>
-      <input type="email" id="email" name="email" v-model="email" />
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" v-model="password" />
-      <button type="submit" @click="logIn">Login</button>
-    </form>
+    <BaseLoader v-show="showLoader" />
+    <div v-show="!showLoader">
+      <h1>Dog Poop Hunt</h1>
+      <form @submit.prevent>
+        <label for="username">Email:</label>
+        <input type="email" id="email" name="email" v-model="email" />
+        <label for="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          v-model="password"
+        />
+        <button type="submit" @click="logIn">Login</button>
+      </form>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
-import { getAchievements, getUser, authenticateUser } from "@/services/api";
+import { authenticateUser } from "@/services/api";
 import CryptoJS from "crypto-js";
+import BaseLoader from "@/components/BaseLoader.vue";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
 const userStore = useUserStore();
+const showLoader = ref(false);
 
 const logIn = async () => {
+  showLoader.value = true;
   var passphrase = "kldiki990dlkl2k2990dlsls";
   var iv = CryptoJS.lib.WordArray.random(16); // 16 bytes IV for AES-128
 
@@ -60,6 +71,7 @@ const logIn = async () => {
   } else {
     alert("Invalid email or password");
   }
+  showLoader.value = false;
 };
 </script>
 
