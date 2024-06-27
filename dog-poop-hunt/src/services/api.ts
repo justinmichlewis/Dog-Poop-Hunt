@@ -18,7 +18,7 @@ const deletePoop = async (poopId: number, pickedUserId: number) => {
     redirect: "follow",
   };
   return await fetch(
-    "http://127.0.0.1:5000/api/poops/" + poopId,
+    "http://127.0.0.1:8000/api/poops/" + poopId,
     requestOptions
   )
     .then((response) => response.text())
@@ -60,7 +60,7 @@ const createPoop = async (
     redirect: "follow",
   };
 
-  return await fetch("http://127.0.0.1:5000/api/poops", requestOptions)
+  return await fetch("http://127.0.0.1:8000/api/poops", requestOptions)
     .then((response) => response.json())
     .then((result) => {
       return { success: true, res: result };
@@ -71,7 +71,7 @@ const createPoop = async (
 };
 
 const getPoops = async () => {
-  return await fetch("http://127.0.0.1:5000/api/poops")
+  return await fetch("http://127.0.0.1:8000/api/poops")
     .then((response) => response.json())
     .then((data) => {
       return { success: true, res: data };
@@ -81,18 +81,7 @@ const getPoops = async () => {
     });
 };
 
-const getUser = async (userName: string) => {
-  return await fetch("http://127.0.0.1:5000/api/users/" + userName)
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-const authenticateUser = async (email: string, password: string) => {
+const authenticateUser = async (email: string, password: object) => {
   const raw = JSON.stringify({
     email: email,
     password: password,
@@ -133,11 +122,4 @@ const getAchievements = async (userName: string) => {
     });
 };
 
-export {
-  deletePoop,
-  createPoop,
-  getPoops,
-  getUser,
-  getAchievements,
-  authenticateUser,
-};
+export { deletePoop, createPoop, getPoops, getAchievements, authenticateUser };
