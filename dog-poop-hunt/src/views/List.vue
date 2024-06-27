@@ -11,12 +11,14 @@
     :age="item.age"
     :bounty="item.bounty"
   />
+  <div class="bottom-margin"></div>
   <BaseNavBar :fixed="true" />
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
+import { getPoops } from "@/services/api";
 import BaseNavBar from "@/components/BaseNavBar.vue";
 import BaseHeader from "@/components/BaseHeader.vue";
 import ListsViewListItem from "@/components/ListViewListItem.vue";
@@ -42,14 +44,14 @@ let selectedItem = ref<Item>();
 let loading = ref(true);
 
 onMounted(async () => {
-  items.value = await fetch("http://127.0.0.1:5000/api/poops")
-    .then((response) => response.json())
-    .then((data) => {
-      itemsHistory = data.filter((item: Item) => item.status === "active");
-      loading.value = false;
-      return itemsHistory;
-    })
-    .catch((error) => console.log("Err", error));
+  const response = await getPoops();
+  if (response.success) {
+    items.value = response.res.filter((item: Item) => item.status === "active");
+    itemsHistory = items.value;
+    loading.value = false;
+  } else if (!response.success) {
+    console.log("Error", response.res);
+  }
 });
 
 const filterPoops = (filter: boolean) => {
@@ -83,5 +85,8 @@ const onItemClicked = (item: Item) => {
   align-items: center;
   justify-content: center;
   height: 50vh;
+}
+.bottom-margin {
+  margin-bottom: 100px;
 }
 </style>
