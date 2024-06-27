@@ -12,7 +12,6 @@
     <BaseActionBar bg-color="#EBA557" @click="pickUp">
       Pick Up Poop
     </BaseActionBar>
-    <BaseActionBar bg-color="#6A98AB"> Navigate </BaseActionBar>
     <BaseNavBar :fixed="false" />
   </div>
 </template>
