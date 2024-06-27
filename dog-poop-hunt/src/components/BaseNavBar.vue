@@ -2,7 +2,7 @@
   <nav :class="fixed ? 'bottom-navigation fixed' : 'bottom-navigation'">
     <router-link to="/map" class="nav-item" exact>Map </router-link>
     <router-link to="/list" class="nav-item" exact>List</router-link>
-    <router-link to="/settings" class="nav-item" exact>Settings</router-link>
+    <router-link to="/me" class="nav-item" exact>Me</router-link>
   </nav>
 </template>
 

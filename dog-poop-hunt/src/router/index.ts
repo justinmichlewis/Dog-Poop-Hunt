@@ -2,9 +2,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "@/views/Login.vue";
 import Map from "@/views/Map.vue";
 import List from "@/views/List.vue";
-import Settings from "@/views/Settings.vue";
+import Me from "@/views/Me.vue";
 import Details from "@/views/Details.vue";
-import Mark from "@/views/Mark.vue";
 
 const router = createRouter({
   history: createWebHistory((import.meta as any).env.BASE_URL),
@@ -25,19 +24,14 @@ const router = createRouter({
       component: List,
     },
     {
-      path: "/settings",
-      name: "settings",
-      component: Settings,
+      path: "/me",
+      name: "me",
+      component: Me,
     },
     {
       path: "/details",
       name: "details",
       component: Details,
-    },
-    {
-      path: "/mark",
-      name: "mark",
-      component: Mark,
     },
   ],
 });
