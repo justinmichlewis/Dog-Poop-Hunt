@@ -4,6 +4,7 @@ from flask_cors import CORS
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 import base64
+import time
 
 app = Flask(__name__)
 
@@ -44,6 +45,10 @@ def close_db(error):
 #AUTHENTICATE USER
 @app.route("/api/users/authenticate", methods=["POST"])
 def authenticate():
+    #REMOVE AFTER TESTING -START
+    time.sleep(2)
+
+
     data = request.json
     print("data", data)
 
