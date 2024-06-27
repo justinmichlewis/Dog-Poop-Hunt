@@ -49,21 +49,17 @@ const logIn = async () => {
 
   const response = await authenticateUser(email.value, requestData);
 
-  console.log(response);
-
-  // const userData = await getUser(userName.value);
-  // const achievmentsData = await getAchievements(userName.value);
-
-  // userStore.setUserData(
-  //   userData.firstName,
-  //   userData.lastName,
-  //   userData.email,
-  //   achievmentsData.totalPoopsPicked,
-  //   -1,
-  //   achievmentsData.totalPoints,
-  //   Number(userName.value)
-  // );
-  // router.push({ name: "map" });
+  if (response.success) {
+    userStore.setUserData(
+      response.firstName,
+      response.lastName,
+      response.email,
+      response.value
+    );
+    router.push({ name: "map" });
+  } else {
+    alert("Invalid email or password");
+  }
 };
 </script>
 
