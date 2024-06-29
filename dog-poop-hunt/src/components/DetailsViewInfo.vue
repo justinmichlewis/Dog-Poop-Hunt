@@ -3,8 +3,9 @@
     <h2>{{ description }}</h2>
     <table class="table">
       <tr>
-        <td class="cell">{{ age }} days old</td>
-        <td class="cell">{{ bounty }} points</td>
+        <td class="cell">Distance: {{ distance }} mi</td>
+        <td class="cell">Age: {{ age }}</td>
+        <td class="cell">Bounty: {{ bounty }}</td>
       </tr>
     </table>
   </div>
@@ -15,6 +16,7 @@ defineProps({
   description: String,
   age: Number,
   bounty: Number,
+  distance: Number,
 });
 </script>
 
