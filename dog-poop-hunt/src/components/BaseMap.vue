@@ -13,6 +13,7 @@ import type { LatLngExpression } from "leaflet";
 import L, { Marker } from "leaflet";
 import { useGeolocation } from "@vueuse/core";
 import { deletePoop } from "../services/api";
+import { getDistance } from "@/services/getdistance";
 import { useUserStore } from "@/stores/user";
 import "leaflet/dist/leaflet.css";
 
@@ -70,7 +71,8 @@ const emit = defineEmits(["map-loaded", "coords"]);
 
 watch(coords, (newCoords) => {
   userLocation.value = [newCoords.latitude, newCoords.longitude];
-  console.log("New coords:", userLocation.value);
+  userStore.lat = newCoords.latitude;
+  userStore.lon = newCoords.longitude;
   emit("coords", userLocation.value);
   //If user marker already exists, update it's position
   if (userMarkerPlaced) {
@@ -137,7 +139,6 @@ const initalizeMap = () => {
 const addMarkers = (markers: [IMarker]) => {
   markers.forEach((marker: IMarker) => {
     if (markerExists(String(marker.poopId))) return;
-    console.log("maarker", marker);
     if (userStore.id === marker.placedUserId) {
       poopMarkersOnMap.push(
         L.marker([marker.latitude, marker.longitude], {
@@ -167,6 +168,7 @@ function markerExists(id: string) {
 const composePopUpContent = (marker: IMarker) => {
   const buttonDetails = document.createElement("button");
   buttonDetails.textContent = "Details";
+  buttonDetails.style.marginRight = "10px";
   buttonDetails.addEventListener("click", () =>
     handlePopUpButtonDetailsClick(marker)
   );
@@ -180,10 +182,18 @@ const composePopUpContent = (marker: IMarker) => {
   const popupContent = document.createElement("div");
   popupContent.innerHTML = `
           <h3>${marker.description}</h3>
-          <p>Age ${marker.age}</p>
+          <p>Distance: ${getDistance(
+            marker.latitude,
+            marker.longitude,
+            userLocation.value[0],
+            userLocation.value[1]
+          )} mi
+          Age: ${marker.age} 
+          Bounty: ${marker.bounty}</p>
         `;
   popupContent.appendChild(buttonDetails);
   popupContent.appendChild(buttonPickUp);
+
   return popupContent;
 };
 
