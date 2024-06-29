@@ -1,5 +1,5 @@
 from pysqlcipher3 import dbapi2 as sqlite
-from flask import Flask, g, request, jsonify
+from flask import Flask, g, json, request, jsonify
 from flask_cors import CORS
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
@@ -11,17 +11,18 @@ app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-
-# REMOVE HARDCODE KEY AFTER TESTING
 DATABASE = '../db/users.db'
-SECRET_KEY = 'Jimn*i8D(9djnfi(D())od9(*8d0-'
+
 
 # Function to connect to the database
 def get_db():
+    with open('../passphrases.json') as f:
+        passphrases = json.load(f)
+        secret_key = passphrases['users']['dbSecret']
+        
     if 'db' not in g:
         g.db = sqlite.connect(DATABASE)
-        # Set the key to decrypt the database
-        g.db.execute("PRAGMA key='Jimn*i8D(9djnfi(D())od9(*8d0-';")
+        g.db.execute("PRAGMA key=" + "'" + secret_key + "'" +  ";")
         g.db.execute("PRAGMA cipher_compatibility = 4;")
         g.db.row_factory = sqlite.Row
     return g.db
@@ -77,7 +78,11 @@ def authenticate():
         return jsonify({'message': 'Authentication failed', 'success': False})
 
 def decrypt_password(data):
-    secret_key = b'kldiki990dlkl2k2990dlsls'
+    with open('../passphrases.json') as f:
+        passphrases = json.load(f)
+        secret_key = passphrases['users']['passwordEncryptionKey']
+   
+    secret_key = bytes(secret_key, 'utf-8')
     encrypted_message = base64.b64decode(data['encrypted_message'])
 
     iv = base64.b64decode(data['iv'])
