@@ -19,6 +19,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { getPoops } from "@/services/api";
+import { getDistance } from "@/services/getdistance";
 import BaseNavBar from "@/components/BaseNavBar.vue";
 import BaseHeader from "@/components/BaseHeader.vue";
 import ListsViewListItem from "@/components/ListViewListItem.vue";
@@ -47,6 +48,16 @@ onMounted(async () => {
   const response = await getPoops();
   if (response.success) {
     items.value = response.res.filter((item: Item) => item.status === "active");
+
+    items.value.forEach((item: Item) => {
+      item.distance = getDistance(
+        item.latitude,
+        item.longitude,
+        userStore.lat,
+        userStore.lon
+      );
+    });
+
     itemsHistory = items.value;
     loading.value = false;
   } else if (!response.success) {
@@ -56,14 +67,12 @@ onMounted(async () => {
 
 const filterPoops = (filter: boolean) => {
   items.value = itemsHistory;
-  console.log("Filter", filter);
-  console.log("Items", items.value);
+
   if (filter) {
     items.value = items.value.filter(
       (item: Item) =>
         item.placedUserId === userStore.id && item.status === "active"
     );
-    console.log("Items", items.value);
   } else {
     items.value = items.value.filter((item: Item) => item.status === "active");
   }
