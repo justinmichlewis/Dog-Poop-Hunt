@@ -15,7 +15,6 @@ const deletePoop = async (poopId: number, pickedUserId: number) => {
     method: "POST",
     headers: myHeaders,
     body: raw,
-    redirect: "follow",
   };
   return await fetch(
     "http://127.0.0.1:8000/api/poops/" + poopId,
@@ -57,7 +56,6 @@ const createPoop = async (
     method: "POST",
     headers: myHeaders,
     body: raw,
-    redirect: "follow",
   };
 
   return await fetch("http://127.0.0.1:8000/api/poops", requestOptions)
@@ -87,7 +85,6 @@ const authenticateUser = async (email: string, password: object) => {
     password: password,
   });
 
-  console.log(raw);
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
@@ -95,7 +92,6 @@ const authenticateUser = async (email: string, password: object) => {
     method: "POST",
     headers: myHeaders,
     body: raw,
-    redirect: "follow",
   };
 
   return await fetch(
@@ -111,8 +107,8 @@ const authenticateUser = async (email: string, password: object) => {
     });
 };
 
-const getAchievements = async (userName: string) => {
-  return await fetch("http://127.0.0.1:5000/api/achievements/" + userName)
+const getAchievements = async (userId: number) => {
+  return await fetch("http://127.0.0.1:8000/api/achievements/" + userId)
     .then((response) => response.json())
     .then((data) => {
       return data;
