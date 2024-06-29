@@ -5,9 +5,9 @@
       <div class="body">{{ props.description }}</div>
       <table class="table">
         <tr>
-          <td class="cell">{{ props.distance }} miles</td>
-          <td class="cell">{{ props.age }} days old</td>
-          <td class="cell">{{ props.bounty }} points</td>
+          <td class="cell">Distance: {{ props.distance }} mi</td>
+          <td class="cell">Age: {{ props.age }}</td>
+          <td class="cell">Bounty: {{ props.bounty }}</td>
         </tr>
       </table>
     </div>
