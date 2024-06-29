@@ -59,13 +59,15 @@ const logIn = async () => {
   };
 
   const response = await authenticateUser(email.value, requestData);
-
+  console.log(response.data);
   if (response.success) {
     userStore.setUserData(
-      response.firstName,
-      response.lastName,
-      response.email,
-      response.value
+      response.data.firstName,
+      response.data.lastName,
+      response.data.email,
+      response.data.id,
+      0,
+      0
     );
     router.push({ name: "map" });
   } else {
