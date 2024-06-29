@@ -35,9 +35,8 @@ const showLoader = ref(false);
 const logIn = async () => {
   showLoader.value = true;
   var passphrase = "kldiki990dlkl2k2990dlsls";
-  var iv = CryptoJS.lib.WordArray.random(16); // 16 bytes IV for AES-128
+  var iv = CryptoJS.lib.WordArray.random(16);
 
-  // Encrypt
   var encrypted = CryptoJS.AES.encrypt(
     password.value,
     CryptoJS.enc.Utf8.parse(passphrase),
@@ -48,11 +47,9 @@ const logIn = async () => {
     }
   );
 
-  // Convert IV and encrypted data to Base64
   var ivBase64 = CryptoJS.enc.Base64.stringify(iv);
   var encryptedBase64 = encrypted.toString();
 
-  // Prepare data to send to Flask server
   var requestData = {
     iv: ivBase64,
     encrypted_message: encryptedBase64,
@@ -81,6 +78,7 @@ const logIn = async () => {
 h1 {
   text-align: center;
   font-size: 3em;
+  margin-top: 1em;
 }
 form {
   width: 50vw;
