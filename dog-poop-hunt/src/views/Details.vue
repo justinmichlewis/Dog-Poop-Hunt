@@ -4,6 +4,7 @@
     :description="query.description ? query.description.toString() : ''"
     :age="query.age ? parseInt(query.age.toString()) : 0"
     :bounty="query.bounty ? parseInt(query.bounty.toString()) : 0"
+    :distance="query.distance ? parseInt(query.distance.toString()) : 0"
   ></DetailsViewInfo>
   <div class="container-content">
     <BaseLoader v-show="loading" class="loading-container" />
